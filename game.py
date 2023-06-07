@@ -37,7 +37,6 @@ def main():
   stream.stop_stream()
   stream.close()
 
-  # TODO write these two methods
   peaks, amplitudes = find_recorded_peaks_and_amplitudes()
 
   while True:
@@ -135,6 +134,7 @@ def return_default_index(audio):
       return i
   return None 
 
+# TODO reduce the use of globals either by dropping the callback paradigm or switching to partials
 record_current_note = None
 record_note_in_a_row = 0
 record_note_dat = np.array([])
