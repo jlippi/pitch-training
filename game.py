@@ -3,7 +3,7 @@
 
 import time
 import pyaudio
-from scipy.fft import fft, fftfreq
+from scipy.fft import rfft, rfftfreq
 import numpy as np
 import re
 from scipy import signal
@@ -147,8 +147,8 @@ def record_note_callback(rawdata, frame_count, time_info, flag):
     dat = np.frombuffer(rawdata, dtype=np.int16)
     N = len(dat)
     T = 1.0 / RATE
-    yf = np.abs(fft(dat)[0:N//2])
-    xf = fftfreq(N, T)[:N//2]
+    yf = rfft(dat)
+    xf = rfftfreq(N, T)
     if (np.max(yf) > 500000):
       note = find_note(xf[np.argmax(yf)], tolerance=15)
       note = re.sub(r'[0-9]', "", note) if note is not None else None
@@ -165,7 +165,7 @@ def record_note_callback(rawdata, frame_count, time_info, flag):
       record_current_note = note
       record_note_in_a_row = 1
 
-    if record_note_in_a_row > 3:
+    if record_note_in_a_row > 6:
       record_note_in_a_row = 0
       print ("you played {}!".format(note))
       return None,pyaudio.paComplete
@@ -183,8 +183,9 @@ def find_note_callback(rawdata, frame_count, time_info, flag):
     dat = np.frombuffer(rawdata, dtype=np.int16)
     N = len(dat)
     T = 1.0 / RATE
-    yf = np.abs(fft(dat)[0:N//2])
-    xf = fftfreq(N, T)[:N//2]
+    # TODO try using dst, here and otherwise
+    yf = rfft(dat)
+    xf = rfftfreq(N, T)
     if (np.max(yf) > 500000):
       note = find_note(xf[np.argmax(yf)], tolerance=15)
       note = re.sub(r'[0-9]', "", note) if note is not None else None
@@ -218,8 +219,8 @@ def find_recorded_peaks_and_amplitudes():
   global record_note_dat
   N = len(record_note_dat)
   T = 1.0 / RATE
-  record_yf = np.abs(fft(record_note_dat)[0:N//2])
-  record_xf = fftfreq(N, T)[:N//2]
+  record_yf = rfft(record_note_dat)
+  record_xf = rfftfreq(N, T)
   
   peak_indices = signal.find_peaks_cwt(record_yf, widths = (30,))
   amplitudes_maxima = list(map(lambda idx: np.max(record_yf[idx - 10:idx + 10]), peak_indices))
