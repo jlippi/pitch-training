@@ -14,6 +14,7 @@ CHANNELS = 1
 RATE = 44100
 CHUNK = 16000
 
+# TODO here and otherwise, reduce use of globals, either shifting away from callback paradigm or to using partials
 goal_note = None
 
 def main():
